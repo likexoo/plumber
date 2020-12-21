@@ -1,4 +1,7 @@
+import { BasePipelineNodeModule } from "./cores/base-pipeline-node-module.core";
+import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
+import { Start } from "./modules/start/module";
 
 // *********************
 // Pipeline
@@ -31,11 +34,11 @@ export interface PipelineNode {
 
 export interface PipelineNodeAnchorPointHookInformation {
 
-    fromModule: PropType<PipelineNode, 'id'>;
+    fromModuleId: PropType<PipelineNode, 'id'>;
     fromModuleType: PipelineNodeModuleName;
     fromModuleAnchorPointName: PropType<PipelineNodeModuleAnchorPointDefinition, 'name'>;
 
-    toModule: PropType<PipelineNode, 'id'>;
+    toModuleId: PropType<PipelineNode, 'id'>;
     toModuleType: PipelineNodeModuleName;
     toModuleAnchorPointName: PropType<PipelineNodeModuleAnchorPointDefinition, 'name'>;
 
@@ -45,7 +48,7 @@ export interface PipelineNodeAnchorPointHookInformation {
 // Pipeline Node Module
 // *********************
 
-export type PipelineNodeModules = Modifier;
+export type PipelineNodeModules = Start | End | Modifier;
 
 export enum PipelineNodeModuleName {
     'MODIFIER' = 'MODIFIER',
@@ -112,7 +115,7 @@ export interface PipelineRunningStatus {
 export interface PipelineStepRunningStatus {
     _origin: PipelineStep;
     _errors: Array<object>;
-    _modules: Array<PipelineNodeModules>;
+    _modules: Array<PipelineNodeModule & BasePipelineNodeModule>;
 }
 
 export interface PipelineNodeRunningStatus {
