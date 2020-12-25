@@ -1,3 +1,3 @@
 # plumber
 
-A commodity data processor that can be dynamically configured.
+A commodity data processor that with pipeline diagram style config.
