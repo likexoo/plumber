@@ -2,7 +2,8 @@
 	"name": "plumber",
 	"version": "1.0.0",
 	"description": "A commodity data processor that can be dynamically configured",
-	"main": "index.js",
+	"main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"test": "jest --passWithNoTests --detectOpenHandles",
