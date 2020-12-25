@@ -1,11 +1,11 @@
 import { Plumber } from "../../src/main";
-import { Item, PipelineNode, PipelineNodeAnchorPointHookInformation, PipelineNodeModuleName, PipelineStep } from "../../src/type";
+import { AnchorPointConfig, HookedPointConfig, Item, PipelineModuleConfig, PipelineNodeModuleName, PipelineStepConfig } from "../../src/type";
 
 test('Class Plumber', () => {
 
     const plumber = new Plumber();
 
-    plumber.startModuleData = [
+    plumber.startData = [
         {
             id: '1',
             metadata: {}
@@ -28,86 +28,131 @@ test('Class Plumber', () => {
             id: '5',
             metadata: {}
         },
-    ] as Array<Item>
+    ] as Array<Item>;
 
     plumber.init(
         [
             {
                 index: 0,
-                nodes: [
+                moduleConfigs: [
                     {
                         id: 'PN0001',
-                        module: PipelineNodeModuleName.START,
-                        config: {},
-                        incomingAnchorPoints: [],
-                        outcomingAnchorPoints: [
+                        name: PipelineNodeModuleName.START,
+                        version: '1.0.0',
+                        incomingAnchorPointConfigs: [],
+                        outcomingAnchorPointConfigs: [
                             {
-                                fromModuleId: 'PN0001',
-                                fromModuleType: PipelineNodeModuleName.START,
-                                fromModuleAnchorPointName: 'DEFAULT',
-                                toModuleId: 'PN0002',
-                                toModuleType: PipelineNodeModuleName.MODIFIER,
-                                toModuleAnchorPointName: 'DEFAULT',
-                            } as PipelineNodeAnchorPointHookInformation
-                        ]
-                    } as PipelineNode
+                                name: 'DEFAULT',
+                                hookedPointConfigs: [
+                                    {
+                                        fromModuleId: 'PN0001',
+                                        fromModuleType: PipelineNodeModuleName.START,
+                                        fromModuleAnchorPointName: 'DEFAULT',
+                                        toModuleId: 'PN0002',
+                                        toModuleType: PipelineNodeModuleName.MODIFIER,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig
+                                ]
+                            } as AnchorPointConfig
+                        ],
+                        moduleConfig: undefined
+                    } as PipelineModuleConfig
                 ]
-            } as PipelineStep,
+            } as PipelineStepConfig,
             {
                 index: 1,
-                nodes: [
+                moduleConfigs: [
                     {
                         id: 'PN0002',
-                        module: PipelineNodeModuleName.MODIFIER,
-                        config: {},
-                        incomingAnchorPoints: [
+                        name: PipelineNodeModuleName.MODIFIER,
+                        version: '1.0.0',
+                        incomingAnchorPointConfigs: [
                             {
-                                fromModuleId: 'PN0001',
-                                fromModuleType: PipelineNodeModuleName.START,
-                                fromModuleAnchorPointName: 'DEFAULT',
-                                toModuleId: 'PN0002',
-                                toModuleType: PipelineNodeModuleName.MODIFIER,
-                                toModuleAnchorPointName: 'DEFAULT',
-                            } as PipelineNodeAnchorPointHookInformation
+                                name: 'DEFAULT',
+                                hookedPointConfigs: [
+                                    {
+                                        fromModuleId: 'PN0001',
+                                        fromModuleType: PipelineNodeModuleName.START,
+                                        fromModuleAnchorPointName: 'DEFAULT',
+                                        toModuleId: 'PN0002',
+                                        toModuleType: PipelineNodeModuleName.MODIFIER,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig
+                                ]
+                            } as AnchorPointConfig
                         ],
-                        outcomingAnchorPoints: [
+                        outcomingAnchorPointConfigs: [
                             {
-                                fromModuleId: 'PN0002',
-                                fromModuleType: PipelineNodeModuleName.MODIFIER,
-                                fromModuleAnchorPointName: 'UNMODIFIED',
-                                toModuleId: 'PN0003',
-                                toModuleType: PipelineNodeModuleName.END,
-                                toModuleAnchorPointName: 'CUSTOM_UNMODIFIED',
-                            } as PipelineNodeAnchorPointHookInformation,
+                                name: 'UNMODIFIED',
+                                hookedPointConfigs: [
+                                    {
+                                        fromModuleId: 'PN0002',
+                                        fromModuleType: PipelineNodeModuleName.MODIFIER,
+                                        fromModuleAnchorPointName: 'UNMODIFIED',
+                                        toModuleId: 'PN0003',
+                                        toModuleType: PipelineNodeModuleName.END,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig
+                                ]
+                            } as AnchorPointConfig,
                             {
-                                fromModuleId: 'PN0002',
-                                fromModuleType: PipelineNodeModuleName.MODIFIER,
-                                fromModuleAnchorPointName: 'MODIFIED',
-                                toModuleId: 'PN0003',
-                                toModuleType: PipelineNodeModuleName.END,
-                                toModuleAnchorPointName: 'CUSTOM_MODIFIED',
-                            } as PipelineNodeAnchorPointHookInformation
-                        ]
-                    } as PipelineNode
+                                name: 'MODIFIED',
+                                hookedPointConfigs: [
+                                    {
+                                        fromModuleId: 'PN0002',
+                                        fromModuleType: PipelineNodeModuleName.MODIFIER,
+                                        fromModuleAnchorPointName: 'MODIFIED',
+                                        toModuleId: 'PN0003',
+                                        toModuleType: PipelineNodeModuleName.END,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig
+                                ]
+                            } as AnchorPointConfig
+                        ],
+                        moduleConfig: undefined
+                    } as PipelineModuleConfig
                 ]
-            } as PipelineStep,
+            } as PipelineStepConfig,
             {
                 index: 2,
-                nodes: [
+                moduleConfigs: [
                     {
                         id: 'PN0003',
-                        module: PipelineNodeModuleName.END,
-                        config: {},
-                        incomingAnchorPoints: [],
-                        outcomingAnchorPoints: []
-                    } as PipelineNode
+                        name: PipelineNodeModuleName.END,
+                        version: '1.0.0',
+                        incomingAnchorPointConfigs: [
+                            {
+                                name: 'DEFAULT',
+                                hookedPointConfigs: [
+                                    {
+                                        fromModuleId: 'PN0002',
+                                        fromModuleType: PipelineNodeModuleName.MODIFIER,
+                                        fromModuleAnchorPointName: 'UNMODIFIED',
+                                        toModuleId: 'PN0003',
+                                        toModuleType: PipelineNodeModuleName.END,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig,
+                                    {
+                                        fromModuleId: 'PN0002',
+                                        fromModuleType: PipelineNodeModuleName.MODIFIER,
+                                        fromModuleAnchorPointName: 'MODIFIED',
+                                        toModuleId: 'PN0003',
+                                        toModuleType: PipelineNodeModuleName.END,
+                                        toModuleAnchorPointName: 'DEFAULT',
+                                    } as HookedPointConfig
+                                ]
+                            } as AnchorPointConfig
+                        ],
+                        outcomingAnchorPointConfigs: [],
+                        moduleConfig: undefined
+                    } as PipelineModuleConfig
                 ]
-            } as PipelineStep,
+            } as PipelineStepConfig,
         ]
     );
 
     plumber.run();
-    
-    console.log(plumber.endModuleData);
+
+    console.log(plumber.endData);
 
 });

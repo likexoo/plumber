@@ -1,116 +1,135 @@
-import { BasePipelineNodeModule } from "./cores/base-pipeline-node-module.core";
 import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
 import { Start } from "./modules/start/module";
 import {
+    AnchorPointRunningStatus,
+    AnchorPointType,
+    HookedPointConfig,
+    HookedPointRunningStatus,
     Item,
-    PipelineNode, PipelineNodeAnchorPointHookInformationRunningStatus, PipelineNodeModule, PipelineNodeModuleAnchorPointDefinition, PipelineNodeModuleName,
-    PipelineNodeModules,
-    PipelineStep, PipelineStepRunningStatus, PropType
+    PipelineModuleConfig,
+    PipelineModuleRunningStatus,
+    PipelineNodeModuleName, 
+    PipelineStepConfig, 
+    PipelineStepRunningStatus
 } from "./type";
 
 export class Plumber {
 
-    protected _stepIndex: number = -1;
-    protected _steps: Array<PipelineStepRunningStatus> = [];
+    protected stepIndex: number = -1;
+    protected steps: Array<PipelineStepRunningStatus> = [];
 
-    public startModuleData: Array<Item> = [];
-    public endModuleData: object | undefined = undefined;
+    public startData: Array<Item> = [];
+    public endData: object | undefined = undefined;
 
     public init(
-        steps: Array<PipelineStep>
+        stepDefinitions: Array<PipelineStepConfig>
     ) {
-        // init all steps
-        steps.forEach((step) => {
+        stepDefinitions.forEach((stepDefTarget) => {
             // init
-            let stepRunningStatus = {
-                _origin: step,
-                _errors: [],
-                _modules: []
-            } as PipelineStepRunningStatus;
-            // install all modules
-            step.nodes.forEach((node) => {
-                const m = this.getModule(node);
-                if (m) {
-                    stepRunningStatus._modules.push(m);
-                }
+            let stepRunningStatus: PipelineStepRunningStatus = {
+                index: stepDefTarget.index,
+                modules: []
+            }
+            // install all module
+            stepDefTarget.moduleConfigs.forEach((moduleConfig) => {
+                const m = this.installModule(moduleConfig);
+                if (m) stepRunningStatus.modules.push(m);
             });
-            // push to running status steps
-            this._steps.push(stepRunningStatus);
+            // push to steps
+            this.steps.push(stepRunningStatus);
         });
     }
 
+    // *********************
+    // Run
+    // *********************
+
     public run() {
-        this.preRun();
-        for (; this._stepIndex < this._steps.length - 1;) {
-            this._stepIndex++;
-            this.runStep(this._steps[this._stepIndex]);
+        for (; this.stepIndex < this.steps.length - 1;) {
+            this.stepIndex++;
+            this.runStep(this.steps[this.stepIndex]);
         }
     }
 
     public * runByGenerator() {
-        this.preRun();
-        while (this._stepIndex < this._steps.length) {
-            this._stepIndex++;
-            this.runStep(this._steps[this._stepIndex]);
+        while (this.stepIndex < this.steps.length) {
+            this.stepIndex++;
+            this.runStep(this.steps[this.stepIndex]);
             yield;
         }
     }
 
-    // *********************
-    // Run Functions
-    // *********************
-
-    private preRun() {
-        this._stepIndex = -1;
-        if (!Array.isArray(this._steps)) {
-            this._steps = [];
-        }
-    }
-
     private runStep(step: PipelineStepRunningStatus) {
-        step._modules.forEach(m => this.runModule(m));
+        step.modules.forEach(m => this.runModule(m));
     }
 
-    private runModule(module: PipelineNodeModule & BasePipelineNodeModule) {
-        module.init();
+    private runModule(module: PipelineModuleRunningStatus) {
         module.run();
         this.transfer(module);
+    }
+
+    // *********************
+    // Module
+    // *********************
+
+    private installModule(
+        config: PipelineModuleConfig
+    ): PipelineModuleRunningStatus | undefined {
+        let m: PipelineModuleRunningStatus | undefined;
+        if (config.name === PipelineNodeModuleName.START) {
+            m = new Start();
+            m.init(config);
+            (m as Start).data = this.startData;
+        }
+        else if (config.name === PipelineNodeModuleName.END) {
+            m = new End();
+            m.init(config);
+        }
+        else if (config.name === PipelineNodeModuleName.MODIFIER) {
+            m = new Modifier();
+            m.init(config);
+        }
+        return m;
     }
 
     // *********************
     // Service
     // *********************
 
-    private transfer(module: PipelineNodeModule & BasePipelineNodeModule) {
-        if (module._origin.module === PipelineNodeModuleName.END) {
-            this.endModuleData = (module as End).data;
+    private transfer(module: PipelineModuleRunningStatus) {
+        // init
+        const nextStepIndex = this.stepIndex + 1;
+        // if module is END
+        if (module._originDefinition.name === PipelineNodeModuleName.END) {
+            this.endData = (module as End).data;
         }
+        // if module is not END
         else {
-            module._outcomingAnchorPointItems.forEach((point) => {
-                const moduleFound = this.findModule(this._stepIndex + 1, point.toModuleId);
-                if (moduleFound) {
-                    if (moduleFound.isDynamicIncomingAnchorPoint) {
-                        moduleFound._incomingAnchorPointItems.push(
+            module._outcomingAnchorPoints.forEach((anchorPoint) => {
+                anchorPoint.hookedPoints.forEach((hookedPoint) => {
+                    const nextModuleAnxhorPoint = this.findAnchorPoint(
+                        nextStepIndex,
+                        hookedPoint.toModuleId,
+                        AnchorPointType.INCOMING,
+                        hookedPoint.toModuleAnchorPointName
+                    );
+                    if (nextModuleAnxhorPoint) {
+                        const nextModuleHookedPoint = this.findHookedPointInAnchorPoint(
+                            nextModuleAnxhorPoint,
                             {
-                                fromModuleId: module._origin.id,
-                                fromModuleType: module._origin.module,
-                                fromModuleAnchorPointName: point.fromModuleAnchorPointName,
-                                toModuleId: moduleFound._origin.id,
-                                toModuleType: moduleFound._origin.module,
-                                toModuleAnchorPointName: point.fromModuleAnchorPointName,
-                                _items: [...point._items]
-
-                            } as PipelineNodeAnchorPointHookInformationRunningStatus
+                                fromModuleId: hookedPoint.fromModuleId,
+                                fromModuleAnchorPointName: hookedPoint.fromModuleAnchorPointName,
+                                toModuleId: hookedPoint.toModuleId,
+                                toModuleAnchorPointName: hookedPoint.toModuleAnchorPointName,
+                            }
                         );
-                    }
-                    else {
-                        const pointFound = this.findAnchorPointItem(this._stepIndex + 1, point.toModuleId, 'INCOMING', 'TO', point.toModuleAnchorPointName);
-                        if (pointFound) {
-                            pointFound._items.push(...point._items);
+                        if (nextModuleHookedPoint) {
+                            if (!Array.isArray(nextModuleHookedPoint.items)) nextModuleHookedPoint.items = [];
+                            nextModuleHookedPoint.items.push(...hookedPoint.items);
                         }
                     }
-                }
+                });
             });
         }
     }
@@ -119,67 +138,54 @@ export class Plumber {
     // Tool Functions
     // *********************
 
-    private getModule(
-        node: PipelineNode
-    ): PipelineNodeModules | undefined {
-        let m = undefined;
-        if (node.module === PipelineNodeModuleName.START) {
-            m = new Start();
-            m._origin = node;
-            m.data = this.startModuleData;
-            this.initModule(m, node);
-        }
-        else if (node.module === PipelineNodeModuleName.END) {
-            m = new End();
-            m._origin = node;
-            this.initModule(m, node);
-        }
-        else if (node.module === PipelineNodeModuleName.MODIFIER) {
-            m = new Modifier();
-            m._origin = node;
-            this.initModule(m, node);
-        }
-        return m;
-    }
-    private initModule(
-        module: PipelineNodeModule & BasePipelineNodeModule,
-        node: PipelineNode
-    ) {
-        module._incomingAnchorPointItems = node.incomingAnchorPoints.map(point => ({ ...point, _items: [] }));
-        module._outcomingAnchorPointItems = node.outcomingAnchorPoints.map(point => ({ ...point, _items: [] }));
-    }
-
     protected findStep(
         stepIndex: number
     ): PipelineStepRunningStatus | undefined {
-        return this._steps.find((step) => step._origin.index === stepIndex);
+        return this.steps.find((step) => step.index === stepIndex);
     }
 
     protected findModule(
         stepIndex: number,
         moduleId: string
-    ): (PipelineNodeModule & BasePipelineNodeModule) | undefined {
+    ): PipelineModuleRunningStatus | undefined {
         const step = this.findStep(stepIndex);
         if (!step) return undefined;
-        return step._modules.find((module) => module._origin.id === moduleId);
+        return step.modules.find((module) => module._originConfig.id === moduleId);
     }
 
-    protected findAnchorPointItem(
+    protected findAnchorPoint(
         stepIndex: number,
         moduleId: string,
-        anchorPointType: 'INCOMING' | 'OUTCOMING',
-        anchorPointDirection: 'FROM' | 'TO',
+        anchorPointType: AnchorPointType,
         anchorPointName: string
-    ): PipelineNodeAnchorPointHookInformationRunningStatus | undefined {
+    ): AnchorPointRunningStatus | undefined {
         const moduleFound = this.findModule(stepIndex, moduleId);
         if (!moduleFound) return undefined;
         return (anchorPointType === 'INCOMING' ?
-            moduleFound._incomingAnchorPointItems : moduleFound._outcomingAnchorPointItems
-        ).find((point) =>
-            (anchorPointDirection === 'FROM' ?
-                point.fromModuleAnchorPointName : point.toModuleAnchorPointName
-            ) === anchorPointName
-        );
+            moduleFound._incomingAnchorPoints : moduleFound._outcomingAnchorPoints
+        ).find((point) => point.name === anchorPointName);
+    }
+
+    protected findHookedPointInAnchorPoint(
+        anchorPoint: AnchorPointRunningStatus,
+        hookedPointInfo: Partial<Pick<HookedPointConfig, 'fromModuleId' | 'fromModuleAnchorPointName' | 'toModuleId' | 'toModuleAnchorPointName'>>
+    ): HookedPointRunningStatus | undefined {
+        return anchorPoint.hookedPoints.find((hookedPoint) => {
+            let isSameHookedPoint: boolean = true;
+            if (hookedPointInfo.hasOwnProperty('fromModuleId') && hookedPoint.fromModuleId !== hookedPointInfo.fromModuleId) {
+                isSameHookedPoint = false;
+            }
+            if (hookedPointInfo.hasOwnProperty('fromModuleAnchorPointName') && hookedPoint.fromModuleAnchorPointName !== hookedPointInfo.fromModuleAnchorPointName) {
+                isSameHookedPoint = false;
+            }
+            if (hookedPointInfo.hasOwnProperty('toModuleId') && hookedPoint.toModuleId !== hookedPointInfo.toModuleId) {
+                isSameHookedPoint = false;
+            }
+            if (hookedPointInfo.hasOwnProperty('toModuleAnchorPointName') && hookedPoint.toModuleAnchorPointName !== hookedPointInfo.toModuleAnchorPointName) {
+                isSameHookedPoint = false;
+            }
+            return isSameHookedPoint;
+        });
     }
 
 }

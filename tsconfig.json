@@ -13,10 +13,13 @@
         "strict": true,
         "strictPropertyInitialization": false,
         "incremental": true,
-        "lib": ["es2018", "esnext.asynciterable"],
+        "lib": [
+            "es2019",
+            "esnext.asynciterable"
+        ],
         "module": "commonjs",
         "moduleResolution": "node",
-        "target": "es2017",
+        "target": "es2019",
         "sourceMap": true,
         "declaration": true
         // --------------------------------------------------------//

@@ -1,54 +1,12 @@
-import { BasePipelineNodeModule } from "./cores/base-pipeline-node-module.core";
+
+// *********************
+// Default
+// *********************
+
+import { BasePipelineModule } from "./cores/base-pipeline-module.core";
 import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
 import { Start } from "./modules/start/module";
-
-// *********************
-// Pipeline
-// *********************
-
-export interface Pipeline {
-    steps: Array<PipelineStep>;
-}
-
-export interface PipelineStep {
-    index: number;
-    nodes: Array<PipelineNode>;
-}
-
-// *********************
-// Pipeline Node
-// *********************
-
-export interface PipelineNode {
-
-    id: string;
-    module: PipelineNodeModuleName;
-
-    config: object;
-
-    incomingAnchorPoints: Array<PipelineNodeAnchorPointHookInformation>;
-    outcomingAnchorPoints: Array<PipelineNodeAnchorPointHookInformation>;
-
-}
-
-export interface PipelineNodeAnchorPointHookInformation {
-
-    fromModuleId: PropType<PipelineNode, 'id'>;
-    fromModuleType: PipelineNodeModuleName;
-    fromModuleAnchorPointName: PropType<PipelineNodeModuleAnchorPointDefinition, 'name'>;
-
-    toModuleId: PropType<PipelineNode, 'id'>;
-    toModuleType: PipelineNodeModuleName;
-    toModuleAnchorPointName: PropType<PipelineNodeModuleAnchorPointDefinition, 'name'>;
-
-}
-
-// *********************
-// Pipeline Node Module
-// *********************
-
-export type PipelineNodeModules = Start | End | Modifier;
 
 export enum PipelineNodeModuleName {
     'MODIFIER' = 'MODIFIER',
@@ -57,28 +15,125 @@ export enum PipelineNodeModuleName {
     'TREE_COMBINER' = 'TREE_COMBINER'
 }
 
-export interface PipelineNodeModule {
+export type PipelineNodeModule = Start | End | Modifier;
 
-    errors: Array<object>;
+export enum AnchorPointType {
+    'INCOMING' = 'INCOMING',
+    'OUTCOMING' = 'OUTCOMING'
+}
 
-    isDynamicIncomingAnchorPoint: boolean;
-    incomingAnchorPointDefinitions: Array<PipelineNodeModuleAnchorPointDefinition>;
+// *********************
+// Pipeline Module Definition
+// *********************
 
-    isDynamicOutcomingAnchorPoint: boolean;
-    outcomingAnchorPointDefinitions: Array<PipelineNodeModuleAnchorPointDefinition>;
+export interface PipelineModuleDefinition {
 
-    init(): void;
+    name: PipelineNodeModuleName;
+    version: string;
 
-    run(): void;
+    incomingAnchorPointDefinitions: Array<AnchorPointDefinition>;
+    outcomingAnchorPointDefinitions: Array<AnchorPointDefinition>;
 
 }
 
-export interface PipelineNodeModuleAnchorPointDefinition {
+export interface AnchorPointDefinition {
 
     name: string;
     isAllowUnhooked: boolean;
     moduleWhitelist: Array<PipelineNodeModuleName>;
 
+}
+
+// *********************
+// Pipeline Step Config
+// *********************
+
+export interface PipelineStepConfig {
+    index: number;
+    moduleConfigs: Array<PipelineModuleConfig>;
+}
+
+
+// *********************
+// Pipeline Module Config
+// *********************
+
+export interface PipelineModuleConfig<MC = object> {
+
+    id: string;
+
+    name: PipelineNodeModuleName;
+    version: string;
+
+    incomingAnchorPointConfigs: Array<AnchorPointConfig>;
+    outcomingAnchorPointConfigs: Array<AnchorPointConfig>;
+
+    moduleConfig: MC | undefined;
+
+}
+
+export interface AnchorPointConfig {
+
+    name: string;
+
+    hookedPointConfigs: Array<HookedPointConfig>
+
+}
+
+export interface HookedPointConfig {
+
+    fromModuleId: string;
+    fromModuleType: PipelineNodeModuleName;
+    fromModuleAnchorPointName: string;
+
+    toModuleId: string;
+    toModuleType: PipelineNodeModuleName;
+    toModuleAnchorPointName: string;
+
+}
+
+// *********************
+// Pipeline Module Running Status
+// *********************
+
+export interface PipelineModuleRunningStatus<MC = object> extends BasePipelineModule<MC> {
+
+    _originDefinition: PipelineModuleDefinition;
+
+    run(): void;
+
+    checkConfig(): boolean;
+
+}
+
+export interface AnchorPointRunningStatus {
+
+    name: string;
+    hookedPoints: Array<HookedPointRunningStatus>;
+
+}
+
+export interface HookedPointRunningStatus {
+
+    fromModuleId: string;
+    fromModuleType: PipelineNodeModuleName;
+    fromModuleAnchorPointName: string;
+
+    toModuleId: string;
+    toModuleType: PipelineNodeModuleName;
+    toModuleAnchorPointName: string;
+
+    items: Array<Item>;
+
+}
+
+// *********************
+// Running Status
+// *********************
+
+export interface PipelineStepRunningStatus {
+    index: number;
+    modules: Array<PipelineModuleRunningStatus>;
 }
 
 // *********************
@@ -101,32 +156,6 @@ export interface CompoundItem<T = unknown> {
 
     items: Array<SingleItem>;
 
-}
-
-// *********************
-// Running Status
-// *********************
-
-export interface PipelineRunningStatus {
-    _origin: Pipeline;
-    _errors: Array<object>;
-}
-
-export interface PipelineStepRunningStatus {
-    _origin: PipelineStep;
-    _errors: Array<object>;
-    _modules: Array<PipelineNodeModule & BasePipelineNodeModule>;
-}
-
-export interface PipelineNodeRunningStatus {
-    _origin: PipelineNode;
-    _incomingAnchorPointItems: Array<PipelineNodeAnchorPointHookInformationRunningStatus>;
-    _outcomingAnchorPointItems: Array<PipelineNodeAnchorPointHookInformationRunningStatus>;
-}
-
-export interface PipelineNodeAnchorPointHookInformationRunningStatus
-    extends PipelineNodeAnchorPointHookInformation {
-    _items: Array<Item>;
 }
 
 // *********************

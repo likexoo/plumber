@@ -1,57 +1,69 @@
-import { BasePipelineNodeModule } from "../../cores/base-pipeline-node-module.core";
-import { PipelineNodeModule, PipelineNodeModuleAnchorPointDefinition } from "../../type";
+import { BasePipelineModule } from "../../cores/base-pipeline-module.core";
+import { AnchorPointType, PipelineModuleDefinition, PipelineModuleRunningStatus, PipelineNodeModuleName } from "../../type";
 
-export class Modifier extends BasePipelineNodeModule implements PipelineNodeModule {
+export class Modifier extends BasePipelineModule<ModifierConfig> implements PipelineModuleRunningStatus {
 
-    // *********************
-    // Pipeline Module
-    // *********************
-
-    errors: object[] = [];
-
-    isDynamicIncomingAnchorPoint: boolean = false;
-    incomingAnchorPointDefinitions: PipelineNodeModuleAnchorPointDefinition[] = [
-        {
-            name: 'DEFAULT',
-            isAllowUnhooked: false,
-            moduleWhitelist: []
-        }
-    ];
-
-    isDynamicOutcomingAnchorPoint: boolean = false;
-    outcomingAnchorPointDefinitions: PipelineNodeModuleAnchorPointDefinition[] = [
-        {
-            name: 'UNMODIFIED',
-            isAllowUnhooked: false,
-            moduleWhitelist: []
-        },
-        {
-            name: 'MODIFIED',
-            isAllowUnhooked: false,
-            moduleWhitelist: []
-        }
-    ];
-
-    init(): void { }
+    _originDefinition: PipelineModuleDefinition = {
+        name: PipelineNodeModuleName.MODIFIER,
+        version: '1.0.0',
+        incomingAnchorPointDefinitions: [
+            {
+                name: 'DEFAULT',
+                isAllowUnhooked: false,
+                moduleWhitelist: []
+            }
+        ],
+        outcomingAnchorPointDefinitions: [
+            {
+                name: 'UNMODIFIED',
+                isAllowUnhooked: false,
+                moduleWhitelist: []
+            },
+            {
+                name: 'MODIFIED',
+                isAllowUnhooked: false,
+                moduleWhitelist: []
+            }
+        ]
+    };
 
     run(): void {
-        this._incomingAnchorPointItems.forEach((point) => {
-            point._items.forEach((item) => {
+        this.getAllHookedPoints(AnchorPointType.INCOMING).forEach((incomingHookedPoint) => {
+            incomingHookedPoint.items.forEach((incomingHookedPointItem) => {
                 // init
                 let isModified: boolean = false;
                 // set property by config
-                if (item && item.metadata) {
-                    isModified = this.setItemProperty(item.metadata as object);
+                if (incomingHookedPointItem && incomingHookedPointItem.metadata) {
+                    isModified = this.setItemProperty(incomingHookedPointItem.metadata as object);
                 }
-                // end
-                if (isModified) {
-                    this.findOutcomingAnchorPointItemByName('FROM', 'MODIFIED')!._items.push(item);
-                }
-                else {
-                    this.findOutcomingAnchorPointItemByName('FROM', 'UNMODIFIED')!._items.push(item);
+                // send to outcoming anchor points
+                const outcomingAnchorPointFound = this.findAnchorPoint(
+                    AnchorPointType.OUTCOMING,
+                    isModified ? 'MODIFIED' : 'UNMODIFIED'
+                );
+                if (outcomingAnchorPointFound) {
+                    outcomingAnchorPointFound.hookedPoints.forEach(target => target.items.push(incomingHookedPointItem));
                 }
             });
         });
+    }
+
+    checkConfig(): boolean {
+        const configs = this._originConfig.moduleConfig;
+        if (configs) {
+            if (!Array.isArray(configs)) {
+                return false;
+            }
+            for (let time = 0; time < configs.length; time++) {
+                if (!configs[time].hasOwnProperty('property')) {
+                    return false;
+                }
+                if (!configs[time].hasOwnProperty('value')) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // *********************
@@ -61,7 +73,7 @@ export class Modifier extends BasePipelineNodeModule implements PipelineNodeModu
     private setItemProperty(item: object): boolean {
         try {
             let isModified: boolean = false;
-            (this._origin.config as ModifierConfig).forEach((config) => {
+            (this._originConfig.moduleConfig || []).forEach((config) => {
                 if (item.hasOwnProperty('' + config.property)) {
                     isModified = true;
                     Object.defineProperty(
@@ -76,7 +88,7 @@ export class Modifier extends BasePipelineNodeModule implements PipelineNodeModu
             });
             return isModified;
         } catch (error) {
-            this.errors.push(error);
+            this._errors.push(error);
             return false;
         }
     }

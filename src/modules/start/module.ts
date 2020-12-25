@@ -1,30 +1,30 @@
-import { BasePipelineNodeModule } from "../../cores/base-pipeline-node-module.core";
-import { Item, PipelineNodeModule, PipelineNodeModuleAnchorPointDefinition } from "../../type";
+import { BasePipelineModule } from "../../cores/base-pipeline-module.core";
+import { AnchorPointType, Item, PipelineModuleDefinition, PipelineModuleRunningStatus, PipelineNodeModuleName } from "../../type";
 
-export class Start extends BasePipelineNodeModule implements PipelineNodeModule {
+export class Start extends BasePipelineModule<object> implements PipelineModuleRunningStatus {
 
-    // *********************
-    // Pipeline Module
-    // *********************
-
-    errors: object[];
-
-    isDynamicIncomingAnchorPoint: boolean = false;
-    incomingAnchorPointDefinitions: PipelineNodeModuleAnchorPointDefinition[] = [];
-
-    isDynamicOutcomingAnchorPoint: boolean = false;
-    outcomingAnchorPointDefinitions: PipelineNodeModuleAnchorPointDefinition[] = [
-        {
-            name: 'DEFAULT',
-            isAllowUnhooked: false,
-            moduleWhitelist: []
-        }
-    ];
-
-    init(): void { }
+    _originDefinition: PipelineModuleDefinition = {
+        name: PipelineNodeModuleName.START,
+        version: '1.0.0',
+        incomingAnchorPointDefinitions: [],
+        outcomingAnchorPointDefinitions: [
+            {
+                name: 'DEFAULT',
+                isAllowUnhooked: false,
+                moduleWhitelist: []
+            }
+        ]
+    };
 
     run(): void {
-        this._outcomingAnchorPointItems[0]._items = [...this.data];
+        console.log(this._outcomingAnchorPoints);
+        this.getAllHookedPoints(AnchorPointType.OUTCOMING).forEach((hookedPoint) => {
+            hookedPoint.items = [...this.data];
+        })
+    }
+
+    checkConfig(): boolean {
+        return true;
     }
 
     // *********************
