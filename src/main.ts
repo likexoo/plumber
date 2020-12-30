@@ -20,7 +20,7 @@ export class Plumber {
     protected steps: Array<PipelineStepRunningStatus> = [];
 
     public startData: Array<Item> = [];
-    public endData: object | undefined = undefined;
+    public endData: Array<HookedPointRunningStatus> = [];
 
     public init(
         stepDefinitions: Array<PipelineStepConfig>
