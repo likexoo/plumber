@@ -34,3 +34,5 @@ export class Start extends BasePipelineModule<object> implements PipelineModuleR
     public data: Array<Item> = [];
 
 }
+
+export type ModifierConfig = object;
