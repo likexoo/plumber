@@ -8,25 +8,27 @@ test('Class Plumber', () => {
     plumber.startData = [
         {
             id: '1',
-            metadata: {}
+            metadata: [],
+            view: [],
+            header: {}
         },
         {
             id: '2',
-            metadata: {}
+            metadata: [],
+            view: [],
+            header: {}
         },
         {
             id: '3',
-            metadata: {},
-            items: [
-                {
-                    id: '4',
-                    metadata: {}
-                }
-            ]
+            metadata: [],
+            view: [],
+            header: {}
         },
         {
             id: '5',
-            metadata: {}
+            metadata: [],
+            view: [],
+            header: {}
         },
     ] as Array<Item>;
 
@@ -154,5 +156,7 @@ test('Class Plumber', () => {
     plumber.run();
 
     console.log(plumber.endData);
+    console.log(plumber.endData[0].data);
+    console.log(plumber.endData[0].data[1].items);
 
 });

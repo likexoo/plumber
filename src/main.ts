@@ -20,7 +20,10 @@ export class Plumber {
     protected steps: Array<PipelineStepRunningStatus> = [];
 
     public startData: Array<Item> = [];
-    public endData: Array<HookedPointRunningStatus> = [];
+    public endData: Array<{
+        endModuleId: string;
+        data: Array<HookedPointRunningStatus>;
+    }> = [];
 
     public init(
         stepDefinitions: Array<PipelineStepConfig>
@@ -102,7 +105,10 @@ export class Plumber {
         const nextStepIndex = this.stepIndex + 1;
         // if module is END
         if (module._originDefinition.name === PipelineNodeModuleName.END) {
-            this.endData = (module as End).data;
+            this.endData.push({
+                endModuleId: module._originConfig.id,
+                data: (module as End).data
+            });
         }
         // if module is not END
         else {

@@ -31,10 +31,12 @@ export class Modifier extends BasePipelineModule<ModifierConfig> implements Pipe
         this.getAllHookedPoints(AnchorPointType.INCOMING).forEach((incomingHookedPoint) => {
             incomingHookedPoint.items.forEach((incomingHookedPointItem) => {
                 // init
-                let isModified: boolean = false;
+                let isModified: boolean = true;
                 // set property by config
-                if (incomingHookedPointItem && incomingHookedPointItem.metadata) {
-                    isModified = this.setItemProperty(incomingHookedPointItem.metadata as object);
+                if (incomingHookedPointItem && Array.isArray(incomingHookedPointItem.metadata)) {
+                    incomingHookedPointItem.metadata.forEach(t => {
+                        if (!this.setItemProperty(t)) isModified = false;
+                    });
                 }
                 // send to outcoming anchor points
                 const outcomingAnchorPointFound = this.findAnchorPoint(

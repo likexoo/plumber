@@ -39,6 +39,7 @@ export interface PipelineModuleDefinition {
 export interface AnchorPointDefinition {
 
     name: string;
+
     isAllowUnhooked: boolean;
     moduleWhitelist: Array<PipelineNodeModuleName>;
 
@@ -140,21 +141,12 @@ export interface PipelineStepRunningStatus {
 // Item
 // *********************
 
-export type Item = SingleItem | CompoundItem;
-
-export interface SingleItem<T = unknown> {
+export interface Item<T = object> {
 
     id: string;
-    metadata: T;
-
-}
-
-export interface CompoundItem<T = unknown> {
-
-    id: string;
+    header: object;
     metadata: Array<T>;
-
-    items: Array<SingleItem>;
+    view: Array<T>;
 
 }
 
