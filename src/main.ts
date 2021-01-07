@@ -1,6 +1,7 @@
 import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
 import { Start } from "./modules/start/module";
+import { TreeCombiner } from "./modules/tree-combiner/module";
 import {
     AnchorPointRunningStatus,
     AnchorPointType,
@@ -91,6 +92,10 @@ export class Plumber {
         }
         else if (config.name === PipelineNodeModuleName.MODIFIER) {
             m = new Modifier();
+            m.init(config);
+        }
+        else if (config.name === PipelineNodeModuleName.TREE_COMBINER) {
+            m = new TreeCombiner();
             m.init(config);
         }
         return m;
