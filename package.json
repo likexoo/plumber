@@ -1,12 +1,12 @@
 {
 	"name": "pipeline-diagram-processor",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A commodity data processor that with pipeline diagram style config",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"test": "jest --passWithNoTests --detectOpenHandles",
+		"test": "jest --passWithNoTests --detectOpenHandles --silent=false",
 		"pretest": "tsc"
 	},
 	"jest": {
