@@ -1,3 +1,4 @@
+import { ConditionTypes, TheValueTypes } from "../../src/cores/base-pipeline-module.core";
 import { Plumber } from "../../src/main";
 import { TreeCombinerTypes } from "../../src/modules/tree-combiner/module";
 import { AnchorPointConfig, HookedPointConfig, Item, PipelineModuleConfig, PipelineNodeModuleName, PipelineStepConfig } from "../../src/type";
@@ -134,7 +135,7 @@ test('Class TreeCombiner', () => {
                                     type: TreeCombinerTypes.PaintType.PAINT_VALUE,
                                     way: TreeCombinerTypes.PaintWayType.SORTED_METADATA_OBJECTS_WITHOUT_DUPLICATE,
                                     value: {
-                                        type: TreeCombinerTypes.TheValueType.KEY,
+                                        type: TheValueTypes.TheValueType.KEY,
                                         key: 'type'
                                     }
                                 },
@@ -143,25 +144,25 @@ test('Class TreeCombiner', () => {
                                     way: TreeCombinerTypes.PaintWayType.SORTED_METADATA_OBJECTS_WITHOUT_DUPLICATE,
                                     consitions: [
                                         {
-                                            type: TreeCombinerTypes.ConditionType.NUMBER_RANGE,
+                                            type: ConditionTypes.ConditionType.NUMBER_RANGE,
                                             valueA: {
-                                                type: TreeCombinerTypes.TheValueType.KEY,
+                                                type: TheValueTypes.TheValueType.KEY,
                                                 key: 'price'
                                             },
                                             valueB: {
-                                                type: TreeCombinerTypes.TheValueType.CONSTANT,
+                                                type: TheValueTypes.TheValueType.CONSTANT,
                                                 value: 9
                                             },
-                                            mathSymbol: TreeCombinerTypes.MathSymbol.GTE,
+                                            mathSymbol: ConditionTypes.MathSymbol.GTE,
                                             decimalPoint: 2
                                         }
                                     ],
                                     true: {
-                                        type: TreeCombinerTypes.TheValueType.CONSTANT,
+                                        type: TheValueTypes.TheValueType.CONSTANT,
                                         value: 'price>=9'
                                     },
                                     false: {
-                                        type: TreeCombinerTypes.TheValueType.CONSTANT,
+                                        type: TheValueTypes.TheValueType.CONSTANT,
                                         value: 'price<9'
                                     }
                                 }

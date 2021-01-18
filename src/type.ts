@@ -7,15 +7,18 @@ import { BasePipelineModule } from "./cores/base-pipeline-module.core";
 import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
 import { Start } from "./modules/start/module";
+import { TreeCombiner } from "./modules/tree-combiner/module";
+import { ViewRefresh } from "./modules/view-refresh/module";
 
 export enum PipelineNodeModuleName {
     'MODIFIER' = 'MODIFIER',
     'START' = 'START',
     'END' = 'END',
-    'TREE_COMBINER' = 'TREE_COMBINER'
+    'TREE_COMBINER' = 'TREE_COMBINER',
+    'VIEW_REFRESH' = 'VIEW_REFRESH',
 }
 
-export type PipelineNodeModule = Start | End | Modifier;
+export type PipelineNodeModule = Start | End | Modifier | TreeCombiner | ViewRefresh;
 
 export enum AnchorPointType {
     'INCOMING' = 'INCOMING',
