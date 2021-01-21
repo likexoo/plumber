@@ -2,6 +2,7 @@ import { End } from "./modules/end/module";
 import { Modifier } from "./modules/modifier/module";
 import { Start } from "./modules/start/module";
 import { TreeCombiner } from "./modules/tree-combiner/module";
+import { ViewRefresh } from "./modules/view-refresh/module";
 import { PipelineModuleConfig, PipelineNodeModule, PipelineNodeModuleName } from "./type";
 
 export function createModuleConfig(
@@ -26,6 +27,9 @@ export function createModuleConfig(
     }
     else if (moduleName === PipelineNodeModuleName.TREE_COMBINER) {
         m = new TreeCombiner();
+    }
+    else if (moduleName === PipelineNodeModuleName.VIEW_REFRESH) {
+        m = new ViewRefresh();
     }
     // set config
     Object.defineProperty(config, 'name', {
