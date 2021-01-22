@@ -34,25 +34,29 @@ export function createModuleConfig(
     // set config
     Object.defineProperty(config, 'name', {
         value: (m as PipelineNodeModule)._originDefinition.name,
-        writable: true
+        writable: true,
+        enumerable: true
     });
     Object.defineProperty(config, 'version', {
         value: (m as PipelineNodeModule)._originDefinition.version,
-        writable: true
+        writable: true,
+        enumerable: true
     });
     Object.defineProperty(config, 'incomingAnchorPointConfigs', {
         value: (m as PipelineNodeModule)._originDefinition.incomingAnchorPointDefinitions.map(t => ({
             name: t.name,
             hookedPointConfigs: []
         })),
-        writable: true
+        writable: true,
+        enumerable: true
     });
     Object.defineProperty(config, 'outcomingAnchorPointConfigs', {
         value: (m as PipelineNodeModule)._originDefinition.outcomingAnchorPointDefinitions.map(t => ({
             name: t.name,
             hookedPointConfigs: []
         })),
-        writable: true
+        writable: true,
+        enumerable: true
     });
     return config as PipelineModuleConfig;
 }
