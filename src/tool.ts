@@ -40,12 +40,18 @@ export function createModuleConfig(
         value: (m as PipelineNodeModule)._originDefinition.version,
         writable: true
     });
-    Object.defineProperty(config, 'incomingAnchorPointDefinitions', {
-        value: (m as PipelineNodeModule)._originDefinition.incomingAnchorPointDefinitions,
+    Object.defineProperty(config, 'incomingAnchorPointConfigs', {
+        value: (m as PipelineNodeModule)._originDefinition.incomingAnchorPointDefinitions.map(t => ({
+            name: t.name,
+            hookedPointConfigs: []
+        })),
         writable: true
     });
-    Object.defineProperty(config, 'outcomingAnchorPointDefinitions', {
-        value: (m as PipelineNodeModule)._originDefinition.outcomingAnchorPointDefinitions,
+    Object.defineProperty(config, 'outcomingAnchorPointConfigs', {
+        value: (m as PipelineNodeModule)._originDefinition.outcomingAnchorPointDefinitions.map(t => ({
+            name: t.name,
+            hookedPointConfigs: []
+        })),
         writable: true
     });
     return config as PipelineModuleConfig;
