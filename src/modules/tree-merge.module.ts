@@ -5,7 +5,7 @@ import { TreeModule, TreeModuleTypes } from "./tree.module";
  */
 export class TreeMergeModule {
 
-    public static excuteTreeMerge(
+    public static executeTreeMerge(
         paints: Array<TreeModuleTypes.Paint>,
         items: object[],
     ): { items: object[]; tree: string; }[] {

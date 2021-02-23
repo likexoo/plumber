@@ -5,9 +5,9 @@ import { ValueModuleTypes } from "../../src/modules/value.module";
 
 describe('TreeMergeModule', function () {
 
-    test('TreeMergeModule.excuteTreeMerge()', async () => {
+    test('TreeMergeModule.executeTreeMerge()', async () => {
 
-        const result1 = TreeMergeModule.excuteTreeMerge(
+        const result1 = TreeMergeModule.executeTreeMerge(
             [
                 {
                     type: TreeModuleTypes.PaintType.PAINT_VALUE,
